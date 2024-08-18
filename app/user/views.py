@@ -2,9 +2,9 @@
 Views for the user API.
 """
 
-from rest_framework import generics, authentication, permissions    # type: ignore
-from rest_framework.authtoken.views import ObtainAuthToken          # type: ignore
-from rest_framework.settings import api_settings                    # type: ignore
+from rest_framework import generics, authentication, permissions    # type: ignore  # noqa: E501
+from rest_framework.authtoken.views import ObtainAuthToken          # type: ignore  # noqa: E501
+from rest_framework.settings import api_settings                    # type: ignore  # noqa: E501
 
 from user.serializers import (
     UserSerializer,

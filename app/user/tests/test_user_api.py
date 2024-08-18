@@ -86,12 +86,7 @@ class PublicUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_token_bad_credentials(self):
-        """Test returns error for invaild credentials while generating token."""
-        user_details = {
-            'name': 'Test Name',
-            'email': 'test@example.com',
-            'password': 'test-user-pass123'
-        }
+        """Test returns error for invaild credentials while generating token."""        # noqa: E501
         create_user(email='test@example.com', password='goodpass123')
 
         payload = {
