@@ -4,7 +4,7 @@ URL mappings for the component APIs.
 
 from django.urls import path, include
 
-from rest_framework.routers import DefaultRouter # type: ignore
+from rest_framework.routers import DefaultRouter        # type: ignore
 
 from component import views
 

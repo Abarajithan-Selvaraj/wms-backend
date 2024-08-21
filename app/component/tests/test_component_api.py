@@ -2,7 +2,7 @@
 Tests for component API.
 """
 
-from decimal import Decimal
+# from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -67,7 +67,10 @@ class PrivateComponentAPITests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user(email='test@example.com', password='testpass123')
+        self.user = create_user(
+            email='test@example.com',
+            password='testpass123'
+        )
         self.client.force_authenticate(self.user)
 
     def test_retrieve_components(self):
@@ -83,8 +86,11 @@ class PrivateComponentAPITests(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_components_list_limited_to_user(self):
-        """Test that the list of components is limited to the authenticated user."""
-        other_user = create_user(email='other@example.com', password='testpass123')
+        """Test that the list of components is limited to the authenticated user."""        # noqa: E501
+        other_user = create_user(
+            email='other@example.com',
+            password='testpass123'
+        )
         create_component(user=other_user)
         create_component(user=self.user)
 
