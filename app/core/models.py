@@ -2,6 +2,7 @@
 Database models.
 """
 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -43,3 +44,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Component(models.Model):
+    """Component object."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    name = models.TextField(max_length=63)
+    parent = models.TextField(max_length=63, blank=True)
+    description = models.TextField(max_length=255, blank=True)
+    version = models.TextField(max_length=7)
+    type = models.TextField(max_length=63)
+    level = models.IntegerField()
+    index = models.IntegerField()
+
+    def __str__(self):
+        return self.name

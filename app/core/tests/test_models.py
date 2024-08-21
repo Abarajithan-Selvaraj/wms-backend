@@ -5,6 +5,8 @@ Tests for models.
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core import models
+
 
 class ModelTests(TestCase):
     """Test Models."""
@@ -48,3 +50,22 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_component(self):
+        """Test creating a new component is successful."""
+        user = get_user_model().objects.create_user(
+            'test@example.com',
+            'testpass@123'
+        )
+
+        component = models.Component.objects.create(
+            user=user,
+            name='00000000',
+            description='Test component',
+            version='0.0',
+            type='part',
+            level=0,
+            index=0
+        )
+
+        self.assertEqual(str(component), component.name)
