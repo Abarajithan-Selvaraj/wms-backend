@@ -11,6 +11,7 @@ from component import views
 
 router = DefaultRouter()
 router.register('component', views.ComponentViewSet)
+router.register('massproperties', views.MassPropertiesViewSet)
 
 app_name = 'component'
 

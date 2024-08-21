@@ -11,7 +11,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient     # type: ignore
 from rest_framework import status             # type: ignore
 
-from core.models import Component
+from core.models import Component, MassProperties
 
 from component.serializers import (
     ComponentSerializer,
@@ -32,11 +32,11 @@ def create_component(user, **params):
     defaults = {
         'name': 'Sample Component',
         'description': 'Sample Component Description',
-        'parent': 'NULL',
         'version': '0.0',
         'type': 'component',
         'level': 0,
-        'index': 0
+        'index': 0,
+        'skeleton': 'Skeleton Model'
     }
     defaults.update(params)
 
@@ -118,7 +118,8 @@ class PrivateComponentAPITests(TestCase):
             'version': '1.0',
             'type': 'PART',
             'level': 0,
-            'index': 0
+            'index': 0,
+            'skeleton': 'Test Skeleton'
         }
         res = self.client.post(COMPONENT_URL, payload)
 
@@ -157,17 +158,19 @@ class PrivateComponentAPITests(TestCase):
             type='PART',
             level=0,
             index=0,
-            description='The Original Component Description'
+            description='The Original Component Description',
+            skeleton='Original Skeleton'
         )
 
         payload = {
             'name': 'New Updated Component',
-            'parent': 'New Parent Component',
+            'parent': 0,
             'version': '1.4',
             'type': 'PART',
             'level': 2,
             'index': 4,
-            'description': 'The New Updated Component Description'
+            'description': 'The New Updated Component Description',
+            'skeleton': 'New Updated Skeleton'
         }
         url = detail_url(component.id)
         res = self.client.patch(url, payload)
@@ -211,3 +214,67 @@ class PrivateComponentAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Component.objects.filter(id=component.id).exists())
+
+    def test_create_component_with_new_mass_properties(self):
+        """Test creating a new component with new mass properties."""
+        payload = {
+            'name': 'Test Component 1',
+            'version': '1.0',
+            'type': 'PART',
+            'level': 0,
+            'index': 0,
+            'skeleton': 'Test Skeleton',
+            'mass_properties': [
+                {'csys_name': 'DEFAULT'},
+                {'csys_name': 'DEFAULT_1'}
+            ]
+        }
+        res = self.client.post(COMPONENT_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        components = Component.objects.filter(user=self.user)
+        self.assertEqual(components.count(), 1)
+        self.assertEqual(components[0].mass_properties.count(), 2)
+        for mp in payload['mass_properties']:
+            exists = components[0].mass_properties.filter(
+                csys_name=mp['csys_name'],
+                user=self.user
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_mass_properties_on_update(self):
+        """Test creating mass properties when updating a component."""
+        component = create_component(user=self.user)
+
+        payload = {
+            'mass_properties': [
+                {'csys_name': 'DEFAULT'},
+                {'csys_name': 'DEFAULT_1'}
+            ]
+        }
+        url = detail_url(component.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_mass_prop = MassProperties.objects.get(
+                            user=self.user,
+                            csys_name='DEFAULT_1'
+                        )
+        self.assertIn(new_mass_prop, component.mass_properties.all())
+
+    def test_clear_component_mass_properties(self):
+        """Test clearing mass properties from a component."""
+        mass_prop = MassProperties.objects.create(
+                        user=self.user,
+                        csys_name='DEFAULT_1',
+                        is_csys_local=False
+                    )
+        component = create_component(user=self.user)
+        component.mass_properties.add(mass_prop)
+
+        payload = {'mass_properties': []}
+        url = detail_url(component.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(component.mass_properties.count(), 0)

@@ -65,7 +65,22 @@ class ModelTests(TestCase):
             version='0.0',
             type='part',
             level=0,
-            index=0
+            index=0,
+            skeleton='Test_Skeleton'
         )
 
         self.assertEqual(str(component), component.name)
+
+    def test_create_mass_properties(self):
+        """Test creating a new mass property is successful."""
+        user = get_user_model().objects.create_user(
+            'test@example.com',
+            'testpass@123'
+        )
+
+        mass_prop = models.MassProperties.objects.create(
+            user=user,
+            csys_name='DEFAULT'
+        )
+
+        self.assertEqual(str(mass_prop), mass_prop.csys_name)
